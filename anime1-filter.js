@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name       Anime1 filter
-// @version    0.2.0a
+// @version    0.2.1
 // @description  Removes links to objectionable adult content.
 // @match      *.anime1.com/*
 // @copyright  2012-2014, Chaim-Leib Halbert
@@ -29,13 +29,13 @@ function main() {
         'shonen ai',
         'shounen ai',
     ]
-        
+    
     function should_censor(str) {
         str = str.toLowerCase();
         var censored = '';
-    
+        
         for (var i=0; i<censor_list.length; i++) {
-            if (censor_list[i] == str) {
+            if (censor_list[i] === str) {
                 console.log('should_censor(\'' + str + '\')');
                 return true;
             }
@@ -56,7 +56,7 @@ function main() {
     // filters the genre links list
     function filter_genre_links() {
         var genre_ary = jQ('.popularity-by-genre > ul a');
-        if (genre_ary.length == 0) {
+        if (genre_ary.length === 0) {
             //console.log('no genres found!');
             return;
         }
@@ -83,7 +83,7 @@ function main() {
     // filters the list of billboard thumbs
     function filter_billboards() {
         var bbs = jQ('div.an-box');
-        if (bbs.length == 0) {
+        if (bbs.length === 0) {
             console.log('no bbs found!');
             return;
         }
