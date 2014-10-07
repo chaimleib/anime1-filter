@@ -79,12 +79,13 @@ function main(jQ) {
     function checkNode(n) {
         if (!n.classList)
             return;
-            // I have to check for 'an-text' class first, because if I were
-            // to check for the enclosing 'an-box' class, it would break.
-            // Apparently, Anime1.com first loads up empty 'an-box'es, then
-            // fills them with images and data. I need to make sure the 'an-text'
-            // elements are present before I can tell whether to censor the
-            // anime or not.
+
+        // I have to check for 'an-text' class first, because if I were
+        // to check for the enclosing 'an-box' class, it would break.
+        // Apparently, Anime1.com first loads up empty 'an-box'es, then
+        // fills them with images and data. I need to make sure the 'an-text'
+        // elements are present before I can tell whether to censor the
+        // anime or not.
         if (inArray('an-text', n.classList)) {
             check_billboard(n.parentNode);
         }
