@@ -1,12 +1,13 @@
 Anime1 Filter
 =============
-
 This userscript scrubs objectionable adult content from anime1.com. It does not handle advertisements; for these, I recommend AdBlock Plus.
+
 
 Current filters
 ---------------
 * Billboard lists (grids of Anime pictures tagged with genres)
 * Genres list (on the Browse by Genre page)
+
 
 Hacking
 -------
@@ -24,7 +25,8 @@ These functions depend on jQuery, so their invocation must be deferred until we 
 ### Dynamic billboard load
 Whenever the user scrolls, new billboards are loaded. These are not filtered by `start_check_billboards`, and a special `observer` object is used to react to the changing DOM. For details about this object, see [MutationObserver](https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver).
 
+
 TODO
 ----
-* Links without genre labels are not filtered.
-* Images may briefly appear before being removed.
+* Links without genre labels are not filtered. This would require loading other pages that contain the genre and/or rating information.
+* Images may briefly appear before being removed. This will require fixing the bootstrapper.
