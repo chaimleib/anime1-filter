@@ -1,11 +1,12 @@
 // ==UserScript==
-// @name       Anime1 filter
-// @version    0.3.1
-// @description  Removes links to objectionable adult content.
-// @match      *.anime1.com/*
-// @copyright  2012-2014, Chaim-Leib Halbert
+// @name        Anime1 filter
+// @version     0.3.1
+// @description Removes links to objectionable adult content.
+// @match       *.anime1.com/*
+// @copyright   2012-2014, Chaim-Leib Halbert
 // ==/UserScript==
 
+// Documentation: https://github.com/chaimleib/anime1-filter
 
 /* ### Utilities ### */
 var MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
@@ -140,7 +141,7 @@ function main() {
 
 
     // filters the genre links list (/content/genre)
-    function filter_genre_links() {
+    function start_check_genre_links() {
         var genre_ary = jQ('.popularity-by-genre > ul a');
         if (genre_ary.length === 0) {
             log('no genres found!');
@@ -156,7 +157,7 @@ function main() {
         }
     }
 
-    filter_genre_links();
+    start_check_genre_links();
     start_check_billboards();
 }
 
