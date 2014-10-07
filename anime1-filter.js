@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name       Anime1 filter
-// @version    0.2.1
+// @version    0.3.1
 // @description  Removes links to objectionable adult content.
 // @match      *.anime1.com/*
 // @copyright  2012-2014, Chaim-Leib Halbert
@@ -9,7 +9,18 @@
 
 /* ### Utilities ### */
 var MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
-    
+
+var DEBUG = false;
+
+function log() {
+    if (DEBUG)
+        console.log.apply(this, arguments);
+}
+
+function warn() {
+    console.warn.appy(this, arguments);
+}
+
 function inArray(val, arr) {
     var i = arr.length;
     while(i--) {
@@ -23,6 +34,7 @@ function forEach(arr, func) {
     while (i--) func(arr[i], i, arr);
 }
 
+
 /* ### Main logic ### */
 // Lower-case list of terms to filter
 var censor_list = [
@@ -31,8 +43,9 @@ var censor_list = [
     'shoujo ai',
     'shonen ai',
     'shounen ai',
+    //'romance',
 ];
-    
+
 // is str in the blacklist?
 function should_censor(str) {
     str = str.toLowerCase();
@@ -42,7 +55,7 @@ function should_censor(str) {
 }
 
 // called when jQ is ready
-function main() {    
+function main() {
     // watch for dynamically-loaded billboards
     function billboards_were_added(mutations) {
         mutations = mutations.filter(function (el) {
@@ -54,7 +67,7 @@ function main() {
             forEach(m.addedNodes, checkNode);
         });
     }
-    
+
     function checkNode(n) {
         if (!n.classList)
             return;
@@ -62,41 +75,14 @@ function main() {
             check_billboard(n.parentNode);
         }
     }
-    
-    
-    /* actually set up the observer to watch for changes */
-    var observer = new MutationObserver(billboards_were_added);
-    // define what element should be observed by the observer
-    // and what types of mutations trigger the callback
-    observer.observe(document.body, {
-      subtree: true,
-      childList: true,
-    });
 
-    
-    // filters the genre links list (/content/genre)
-    function filter_genre_links() {
-        var genre_ary = jQ('.popularity-by-genre > ul a');
-        if (genre_ary.length === 0) {
-            //console.log('no genres found!');
-            return;
-        }
-
-        for (var i=0; i<genre_ary.length; i++) {
-            var a = genre_ary[i];
-            var li = a.parentNode;
-            if (should_censor(a.innerHTML)) {
-                li.parentNode.removeChild(li);
-            }
-        }
-    }
 
     function check_billboard(bb) {
         if (should_censor_billboard(bb)) {
             remove_billboard(bb);
         }
     }
-    
+
     // given a billboard node, return whether it should be censored.
     function should_censor_billboard(bb) {
         var genres = jQ(bb).find('div.dgenres a');
@@ -109,16 +95,16 @@ function main() {
 
     function remove_billboard(bb) {
         var name = get_billboard_name(bb);
-    	bb.parentNode.removeChild(bb);
-        console.log('!!Removed: ' + name);
+        bb.parentNode.removeChild(bb);
+        log('!!Removed: ' + name);
     }
-    
+
     function get_billboard_name(bb) {
-    	var heads = jQ(bb).find('h2');
+        var heads = jQ(bb).find('h2');
         var name;
         if (!heads.length) {
-            console.log('weird!');
-            console.log(bb);
+            warn('could not read bb name!');
+            warn(bb);
             name = "???";
         }
         else {
@@ -126,30 +112,60 @@ function main() {
         }
         return name;
     }
-    
-    // filters the list of billboard thumbs
+
+    // filters the list of billboard thumbs on initial document load
     function start_check_billboards() {
         var bbs = jQ('div.an-box');
         if (!bbs.length) {
-            console.log('no bbs found!');
+            log('no bbs found!');
             observer.disconnect();
             return;
         }
         else {
-            console.log('found ' + bbs.length + ' billboards.');
+            log('found ' + bbs.length + ' billboards.');
         }
-		forEach(bbs, check_billboard);
+        forEach(bbs, check_billboard);
+    }
+
+
+
+    /* actually set up the observer to watch for changes */
+    var observer = new MutationObserver(billboards_were_added);
+    // define what element should be observed by the observer
+    // and what types of mutations trigger the callback
+    observer.observe(document.body, {
+      subtree: true,
+      childList: true,
+    });
+
+
+    // filters the genre links list (/content/genre)
+    function filter_genre_links() {
+        var genre_ary = jQ('.popularity-by-genre > ul a');
+        if (genre_ary.length === 0) {
+            log('no genres found!');
+            return;
+        }
+
+        for (var i=0; i<genre_ary.length; i++) {
+            var a = genre_ary[i];
+            var li = a.parentNode;
+            if (should_censor(a.innerHTML)) {
+                li.parentNode.removeChild(li);
+            }
+        }
     }
 
     filter_genre_links();
     start_check_billboards();
 }
 
+
 /* ### Bootstrapper ### */
 function addJQuery(callback) {
   var script = document.createElement("script");
   //script.setAttribute("src", "//ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js");
-  script.addEventListener('ready', function() {
+  document.addEventListener('load', function() {
     var script = document.createElement("script");
       script.textContent = "window.jQ=$;(" + callback.toString() + ")();";
     document.body.appendChild(script);
@@ -159,7 +175,7 @@ function addJQuery(callback) {
 // Make sure jQ is loaded before calling main()
 var jQ = $;
 if (jQ !== undefined) {
-    console.log('Waiting for jQuery...');
+    log('Waiting for jQuery...');
     main();
 } else {
     addJQuery(main);
