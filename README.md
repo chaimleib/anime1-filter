@@ -3,6 +3,11 @@ Anime1 Filter
 This userscript scrubs objectionable adult content from anime1.com. It does not handle advertisements; for these, I recommend AdBlock Plus.
 
 
+Disclaimer
+----------
+This software is provided for free without any guarantees or warranties. It is a work in progress, and while somewhat functional, it is not perfect. This software was not produced in cooperation with Anime1.com, and functionality may break unexpectedly when Anime1.com changes their web site.
+
+
 Current filters
 ---------------
 * Billboard lists (grids of Anime pictures tagged with genres)
