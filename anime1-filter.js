@@ -54,10 +54,7 @@ var censor_list = [
 
 // is str in the blacklist?
 function should_censor(str) {
-    str = str.toLowerCase();
-    var censored = '';
-    var i = censor_list.length;
-    return inArray(str, censor_list);
+    return inArray(str.toLowerCase(), censor_list);
 }
 
 // called when jQ is ready
