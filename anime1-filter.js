@@ -24,6 +24,7 @@ function warn() {
 
 // whether val is in arr
 function inArray(val, arr) {
+    // apparently, a decrementing while loop is the fastest way to iterate
     var i = arr.length;
     while(i--) {
         if (val === arr[i]) return true;
@@ -31,7 +32,9 @@ function inArray(val, arr) {
     return false;
 }
 
-// used for NodeLists, which are not quite like arrays
+// used for NodeLists, which are not quite like arrays, and have no forEach()
+// method.
+// https://developer.mozilla.org/en-US/docs/Web/API/NodeList
 function forEach(arr, func) {
     var i = arr.length;
     while (i--) func(arr[i], i, arr);
@@ -59,8 +62,11 @@ function should_censor(str) {
 
 // called when jQ is ready
 function main() {
-    // watch for dynamically-loaded billboards
+    // watch for dynamically-loaded billboards. takes an array of
+    // MutationRecords.
+    // https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver#MutationRecord
     function billboards_were_added(mutations) {
+        // I only care about addedNodes, not removedNodes, so filter them
         mutations = mutations.filter(function (el) {
             return el.addedNodes.length;
         });
@@ -70,11 +76,18 @@ function main() {
             forEach(m.addedNodes, checkNode);
         });
     }
-    
-    // check each changed node for a billboard and censor it
+
+    // check each changed node for a billboard and censor it. Takes a Node.
+    // https://developer.mozilla.org/en-US/docs/Web/API/Node
     function checkNode(n) {
         if (!n.classList)
             return;
+            // I have to check for 'an-text' class first, because if I were
+            // to check for the enclosing 'an-box' class, it would break.
+            // Apparently, Anime1.com first loads up empty 'an-box'es, then
+            // fills them with images and data. I need to make sure the 'an-text'
+            // elements are present before I can tell whether to censor the
+            // anime or not.
         if (inArray('an-text', n.classList)) {
             check_billboard(n.parentNode);
         }
@@ -170,13 +183,13 @@ function main() {
 /* ### Bootstrapper ### */
 // wait for jQuery, then call main()
 function addJQuery(callback) {
-  var script = document.createElement("script");
-  //script.setAttribute("src", "//ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js");
-  document.addEventListener('load', function() {
-    var script = document.createElement("script");
-      script.textContent = "window.jQ=$;(" + callback.toString() + ")();";
-    document.body.appendChild(script);
-  }, false);
+    document.addEventListener('load', function() {
+        var script = document.createElement("script");
+        //script.setAttribute("src", "//ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js");
+
+        script.textContent = "window.jQ=$;(" + callback.toString() + ")();";
+        document.body.appendChild(script);
+    }, false);
 }
 
 // Make sure jQ is loaded before calling main()
