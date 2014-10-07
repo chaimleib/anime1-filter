@@ -22,6 +22,7 @@ function warn() {
     console.warn.appy(this, arguments);
 }
 
+// whether val is in arr
 function inArray(val, arr) {
     var i = arr.length;
     while(i--) {
@@ -30,6 +31,7 @@ function inArray(val, arr) {
     return false;
 }
 
+// used for NodeLists, which are not quite like arrays
 function forEach(arr, func) {
     var i = arr.length;
     while (i--) func(arr[i], i, arr);
@@ -68,7 +70,8 @@ function main() {
             forEach(m.addedNodes, checkNode);
         });
     }
-
+    
+    // check each changed node for a billboard and censor it
     function checkNode(n) {
         if (!n.classList)
             return;
@@ -77,14 +80,14 @@ function main() {
         }
     }
 
-
+    // remove billboard if it has a blacklisted genre
     function check_billboard(bb) {
         if (should_censor_billboard(bb)) {
             remove_billboard(bb);
         }
     }
 
-    // given a billboard node, return whether it should be censored.
+    // whether the billboard is for an anime in a blacklisted genre
     function should_censor_billboard(bb) {
         var genres = jQ(bb).find('div.dgenres a');
         for (var i=0; i<genres.length; i++) {
@@ -94,12 +97,14 @@ function main() {
         return false;
     }
 
+    // remove the billboard from the DOM
     function remove_billboard(bb) {
         var name = get_billboard_name(bb);
         bb.parentNode.removeChild(bb);
         log('!!Removed: ' + name);
     }
 
+    // extract the name of the billboard's anime
     function get_billboard_name(bb) {
         var heads = jQ(bb).find('h2');
         var name;
@@ -114,7 +119,7 @@ function main() {
         return name;
     }
 
-    // filters the list of billboard thumbs on initial document load
+    // filters the list of billboards on initial document load
     function start_check_billboards() {
         var bbs = jQ('div.an-box');
         if (!bbs.length) {
@@ -163,6 +168,7 @@ function main() {
 
 
 /* ### Bootstrapper ### */
+// wait for jQuery, then call main()
 function addJQuery(callback) {
   var script = document.createElement("script");
   //script.setAttribute("src", "//ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js");
@@ -176,8 +182,8 @@ function addJQuery(callback) {
 // Make sure jQ is loaded before calling main()
 var jQ = $;
 if (jQ !== undefined) {
-    log('Waiting for jQuery...');
     main();
 } else {
+    log('Waiting for jQuery...');
     addJQuery(main);
 }
