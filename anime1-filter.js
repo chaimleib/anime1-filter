@@ -11,15 +11,15 @@
 /* ### Utilities ### */
 var MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
 
-var DEBUG = false;
+var DEBUG = true;
 
 function log() {
     if (DEBUG)
-        console.log.apply(this, arguments);
+        console.log.apply(console, arguments);
 }
 
 function warn() {
-    console.warn.appy(this, arguments);
+    console.warn.appy(console, arguments);
 }
 
 // whether val is in arr
@@ -61,7 +61,7 @@ function should_censor(str) {
 }
 
 // called when jQ is ready
-function main() {
+function main(jQ) {
     // watch for dynamically-loaded billboards. takes an array of
     // MutationRecords.
     // https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver#MutationRecord
@@ -185,17 +185,18 @@ function main() {
 function addJQuery(callback) {
     document.addEventListener('load', function() {
         var script = document.createElement("script");
-        //script.setAttribute("src", "//ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js");
-
-        script.textContent = "window.jQ=$;(" + callback.toString() + ")();";
+        script.setAttribute("src", "//ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js");
+        script.textContent = "(" + callback.toString() + ")(jQuery);";
+        //script.textContent = "window.jQ=$;(" + callback.toString() + ")();";
         document.body.appendChild(script);
     }, false);
 }
 
 // Make sure jQ is loaded before calling main()
-var jQ = $;
-if (jQ !== undefined) {
-    main();
+if (jQuery !== undefined) {
+    log('Skipping delay for jQ')
+    log(main.toString());
+    main(jQuery);
 } else {
     log('Waiting for jQuery...');
     addJQuery(main);
