@@ -9,5 +9,5 @@ The filter currently operates on the Genres list and billboards on the home page
 
 TODO
 ----
-* New content that is auto-loaded when the page is scrolled is not currently filtered.
 * Links without genre labels are not filtered.
+* Images may briefly appear before being removed.

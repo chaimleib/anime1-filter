@@ -7,53 +7,74 @@
 // ==/UserScript==
 
 
-// a function that loads jQuery and calls a callback function when jQuery has finished loading
-function addJQuery(callback) {
-  var script = document.createElement("script");
-  script.setAttribute("src", "//ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js");
-  script.addEventListener('load', function() {
-    var script = document.createElement("script");
-    script.textContent = "window.jQ=jQuery.noConflict(true);(" + callback.toString() + ")();";
-    document.body.appendChild(script);
-  }, false);
-  document.body.appendChild(script);
+/* ### Utilities ### */
+var MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
+    
+function inArray(val, arr) {
+    var i = arr.length;
+    while(i--) {
+        if (val === arr[i]) return true;
+    }
+    return false;
 }
 
-// the guts of this userscript
-function main() {
-    // Lower-case list of terms to filter
-    var censor_list = [
-        'ecchi',
-        'harem',
-        'shoujo ai',
-        'shonen ai',
-        'shounen ai',
-    ]
+function forEach(arr, func) {
+    var i = arr.length;
+    while (i--) func(arr[i], i, arr);
+}
+
+/* ### Main logic ### */
+// Lower-case list of terms to filter
+var censor_list = [
+    'ecchi',
+    'harem',
+    'shoujo ai',
+    'shonen ai',
+    'shounen ai',
+];
     
-    function should_censor(str) {
-        str = str.toLowerCase();
-        var censored = '';
-        
-        for (var i=0; i<censor_list.length; i++) {
-            if (censor_list[i] === str) {
-                console.log('should_censor(\'' + str + '\')');
-                return true;
-            }
-        }
-        return false;
+// is str in the blacklist?
+function should_censor(str) {
+    str = str.toLowerCase();
+    var censored = '';
+    var i = censor_list.length;
+    return inArray(str, censor_list);
+}
+
+// called when jQ is ready
+function main() {    
+    // watch for dynamically-loaded billboards
+    function billboards_were_added(mutations) {
+        mutations = mutations.filter(function (el) {
+            return el.addedNodes.length;
+        });
+        if (!mutations.length)
+            return;
+        forEach(mutations, function (m) {
+            forEach(m.addedNodes, checkNode);
+        });
     }
-
-    function nodes_to_string(nodes) {
-        var result = '[';
-        for (var i=0; i<nodes.length; i++) {
-            var node = nodes[i];
-            result += node.innerHTML + ', ';
+    
+    function checkNode(n) {
+        if (!n.classList)
+            return;
+        if (inArray('an-text', n.classList)) {
+            check_billboard(n.parentNode);
         }
-        result += ']';
-        return result;
-    }    
+    }
+    
+    
+    /* actually set up the observer to watch for changes */
+    var observer = new MutationObserver(billboards_were_added);
+    // define what element should be observed by the observer
+    // and what types of mutations trigger the callback
+    observer.observe(document.body, {
+      subtree: true,
+      childList: true,
+    });
 
-    // filters the genre links list
+    
+    // filters the genre links list (/content/genre)
     function filter_genre_links() {
         var genre_ary = jQ('.popularity-by-genre > ul a');
         if (genre_ary.length === 0) {
@@ -70,6 +91,12 @@ function main() {
         }
     }
 
+    function check_billboard(bb) {
+        if (should_censor_billboard(bb)) {
+            remove_billboard(bb);
+        }
+    }
+    
     // given a billboard node, return whether it should be censored.
     function should_censor_billboard(bb) {
         var genres = jQ(bb).find('div.dgenres a');
@@ -80,29 +107,60 @@ function main() {
         return false;
     }
 
+    function remove_billboard(bb) {
+        var name = get_billboard_name(bb);
+    	bb.parentNode.removeChild(bb);
+        console.log('!!Removed: ' + name);
+    }
+    
+    function get_billboard_name(bb) {
+    	var heads = jQ(bb).find('h2');
+        var name;
+        if (!heads.length) {
+            console.log('weird!');
+            console.log(bb);
+            name = "???";
+        }
+        else {
+            name = heads[0].innerHTML;
+        }
+        return name;
+    }
+    
     // filters the list of billboard thumbs
-    function filter_billboards() {
+    function start_check_billboards() {
         var bbs = jQ('div.an-box');
-        if (bbs.length === 0) {
+        if (!bbs.length) {
             console.log('no bbs found!');
+            observer.disconnect();
             return;
         }
         else {
             console.log('found ' + bbs.length + ' billboards.');
         }
-        
-        for (var i=0; i<bbs.length; i++) {
-            var bb = bbs[i];
-            var name = jQ(bb).find('h2')[0].innerHTML;
-            if (should_censor_billboard(bb)) {
-                console.log('!!Removed: ' + name);
-                bb.parentNode.removeChild(bb);
-            }
-        }           
+		forEach(bbs, check_billboard);
     }
 
     filter_genre_links();
-    filter_billboards();
+    start_check_billboards();
 }
-// load jQuery and execute the main function
-addJQuery(main);
+
+/* ### Bootstrapper ### */
+function addJQuery(callback) {
+  var script = document.createElement("script");
+  //script.setAttribute("src", "//ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js");
+  script.addEventListener('ready', function() {
+    var script = document.createElement("script");
+      script.textContent = "window.jQ=$;(" + callback.toString() + ")();";
+    document.body.appendChild(script);
+  }, false);
+}
+
+// Make sure jQ is loaded before calling main()
+var jQ = $;
+if (jQ !== undefined) {
+    console.log('Waiting for jQuery...');
+    main();
+} else {
+    addJQuery(main);
+}
