@@ -1,9 +1,11 @@
 // ==UserScript==
 // @name        Anime1 filter
-// @version     0.3.1
+// @version     0.3.2
 // @description Removes links to objectionable adult content.
 // @match       *.anime1.com/*
 // @copyright   2012-2014, Chaim-Leib Halbert
+// @updateURL   https://raw.githubusercontent.com/chaimleib/anime1-filter/master/anime1-filter.js
+// @downloadURL   https://raw.githubusercontent.com/chaimleib/anime1-filter/master/anime1-filter.js
 // ==/UserScript==
 
 // Documentation: https://github.com/chaimleib/anime1-filter
