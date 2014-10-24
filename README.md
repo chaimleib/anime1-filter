@@ -8,6 +8,11 @@ Disclaimer
 This software is provided for free without any guarantees or warranties. It is a work in progress, and while somewhat functional, it is not perfect or complete. This software was not produced in cooperation with Anime1.com, and functionality may break unexpectedly when Anime1.com changes their web site.
 
 
+Compatibility
+-------------
+This userscript has been fully tested on:
+* Google Chrome
+
 Current filters
 ---------------
 * Billboard lists (grids of Anime pictures tagged with genres)
